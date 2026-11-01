@@ -1,0 +1,22 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { env } from './config/env.js';
+import healthRoutes from './routes/health.routes.js';
+import caseRoutes from './routes/case.routes.js';
+import investigationRoutes from './routes/investigation.routes.js';
+import { errorHandler } from './middleware/error-handler.js';
+
+const app = express();
+app.disable('x-powered-by');
+app.use(helmet());
+app.use(cors({ origin: env.clientOrigin.split(',').map((origin) => origin.trim()), methods: ['GET', 'POST', 'PATCH'], allowedHeaders: ['Content-Type', 'X-Session-Token'] }));
+app.use(express.json({ limit: '32kb' }));
+app.use('/api/v1', rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false }));
+app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/cases', caseRoutes);
+app.use('/api/v1/investigations', investigationRoutes);
+app.use((req, res) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found.' } }));
+app.use(errorHandler);
+export default app;
