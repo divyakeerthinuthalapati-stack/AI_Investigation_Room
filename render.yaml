@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-investigation-room-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SESSION_TOKEN_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
